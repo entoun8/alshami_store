@@ -24,12 +24,18 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/products" className="hover:text-white transition-colors">
+                <Link
+                  href="/products"
+                  className="hover:text-white transition-colors"
+                >
                   Products
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-white transition-colors">
+                <Link
+                  href="/contact"
+                  className="hover:text-white transition-colors"
+                >
                   Contact
                 </Link>
               </li>
@@ -41,12 +47,18 @@ export default function Footer() {
             <h4 className="text-sm font-semibold text-white mb-3">Support</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
+                <Link
+                  href="/about"
+                  className="hover:text-white transition-colors"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-white transition-colors">
+                <Link
+                  href="/faq"
+                  className="hover:text-white transition-colors"
+                >
                   FAQ
                 </Link>
               </li>
@@ -56,7 +68,9 @@ export default function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t border-white/10 pt-6 text-center text-sm">
-          <p>© {currentYear} {APP_NAME}. All rights reserved.</p>
+          <p>
+            © {currentYear} {APP_NAME}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

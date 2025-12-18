@@ -43,9 +43,14 @@ components/
 └── ui/              # shadcn/ui components (auto-installed)
 
 lib/
-├── constants/
-│   └── index.ts     # App constants (APP_NAME, APP_DESCRIPTION, SERVER_URL)
-└── utils.ts         # Utility functions (cn() for class merging)
+├── constants.ts     # App constants (APP_NAME, APP_DESCRIPTION, SERVER_URL)
+├── utils.ts         # Utility functions (cn() for class merging)
+├── supabase.ts      # Supabase client configuration
+├── data-service.ts  # Database read operations (Server Components)
+├── actions.ts       # Server Actions for mutations (CREATE/UPDATE/DELETE)
+└── validators.ts    # Zod validation schemas
+
+types.ts             # TypeScript type definitions (Product, etc.)
 ```
 
 ### Key Patterns
@@ -57,6 +62,8 @@ lib/
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/constants";
+import { Product } from "@/types";
+import { getProducts } from "@/lib/data-service";
 ```
 
 **Class Name Utilities**: Use `cn()` from `@/lib/utils` to merge Tailwind classes with shadcn component variants:
@@ -66,7 +73,7 @@ import { APP_NAME } from "@/lib/constants";
 
 ## UI Development - CRITICAL RULES
 
-**IMPORTANT**: Before implementing any UI components, **always check `docs/ui.md`** for detailed design guidelines, patterns, and examples specific to this project.
+**IMPORTANT**: Before implementing any UI components, **always check `docs/UI_GUIDELINES.md`** for detailed design guidelines, patterns, and examples specific to this project.
 
 ### 1. Component Library (shadcn/ui ONLY)
 
@@ -202,9 +209,58 @@ ESLint configured with Next.js recommended rules:
 
 Ignored directories: `.next/`, `out/`, `build/`, `next-env.d.ts`
 
+## Database & Backend Patterns
+
+### Supabase Integration
+
+**Read Operations** - Use `lib/data-service.ts`:
+```tsx
+// Server Component
+import { getProducts } from "@/lib/data-service";
+
+export default async function ProductsPage() {
+  const products = await getProducts(); // Fetches from Supabase
+  return <div>{products.map(p => ...)}</div>;
+}
+```
+
+**Write Operations** - Use Server Actions in `lib/actions.ts`:
+```tsx
+"use server"
+
+export async function createProduct(formData: FormData) {
+  // 1. Validate with Zod
+  // 2. Insert to Supabase
+  // 3. Revalidate path
+  // 4. Redirect
+}
+```
+
+**Key Rules:**
+- Read data directly in Server Components (no Server Actions)
+- Use Server Actions only for mutations (CREATE/UPDATE/DELETE)
+- Always validate with Zod schemas from `lib/validators.ts`
+- Types defined in `types.ts` using Zod inference
+
+### Product Schema
+
+**Database Table:** `Product`
+- `id` (string/UUID)
+- `name` (string, min 3 chars)
+- `slug` (string, min 3 chars, unique)
+- `category` (string, min 3 chars)
+- `brand` (string, min 3 chars)
+- `description` (string, min 3 chars)
+- `stock` (number, positive integer)
+- `image` (string, required)
+- `price` (string with 2 decimals)
+- `created_at` (timestamp)
+
+**Validation:** See `lib/validators.ts` - `insertProductSchema`
+
 ## Important Constants
 
-Defined in `lib/constants/index.ts`:
+Defined in `lib/constants.ts`:
 - `APP_NAME`: "Alshami"
 - `APP_DESCRIPTION`: "A modern e-commerce platform for premium herbs, coffees, and more."
 - `SERVER_URL`: "http://localhost:3000"
@@ -238,4 +294,11 @@ Used in root layout for metadata configuration.
 - **Animation utilities**: `tw-animate-css` package available
 - **Class variance**: Uses `class-variance-authority` for component variants
 
-Refer to `docs/ui.md` for detailed UI design rules and examples.
+## Documentation References
+
+For detailed implementation guidelines, refer to:
+- **`docs/UI_GUIDELINES.md`**: Complete UI design rules, component usage, color system, and layout patterns
+- **`docs/SUPABASE_GUIDELINES.md`**: Database setup, authentication, and Supabase integration guidelines
+- **`docs/ZOD_VALIDATION_GUIDELINES.md`**: Form validation patterns, schema definitions, and error handling with Zod
+
+**IMPORTANT**: Before implementing any form validation or data validation, **always check `docs/ZOD_VALIDATION_GUIDELINES.md`** for validation patterns, schema best practices, and integration with Server Actions.
