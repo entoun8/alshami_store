@@ -1,7 +1,42 @@
 "use server";
 
+import { signIn, signOut } from "./auth";
 import { supabase } from "./supabase";
-import { revalidatePath } from "next/cache";
+
+export async function signInAction() {
+  await signIn("google", {
+    redirectTo: "/",
+  });
+}
+
+export async function signOutAction() {
+  await signOut({
+    redirectTo: "/",
+  });
+}
+
+// Create a new user profile (called from auth signIn callback)
+export async function createUserProfile(profileData: {
+  email: string;
+  full_name: string;
+  image?: string;
+}) {
+  const { data, error } = await supabase
+    .from("user_profile")
+    .insert([
+      {
+        email: profileData.email,
+        full_name: profileData.full_name,
+        image: profileData.image,
+        role: "user",
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
 
 // Add your create/update/delete operations here
 // Example:

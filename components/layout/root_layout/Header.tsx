@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Menu, User } from "lucide-react";
+import { Menu, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "../Logo";
 import CartIcon from "../CartIcon";
@@ -11,8 +11,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import auth from "@/middleware";
+import SignOutButton from "@/components/authentication/SignOutButton";
 
-const Header = () => {
+export default async function Header() {
+  const session = await auth();
+
   const navLinks = [
     { href: "/products", label: "Products" },
     { href: "/contact", label: "Contact" },
@@ -40,13 +44,19 @@ const Header = () => {
 
         {/* Right Side - Desktop: Cart & Sign In, Mobile: Burger Menu */}
         <div className="flex items-center gap-3">
-          {/* Desktop - Cart & Sign In (hidden on mobile) */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop - Cart & Sign In/Out (hidden on mobile) */}
+          <div className="hidden md:flex items-center gap-4">
             <CartIcon />
-            <Button size="sm" className="gap-2">
-              <User className="h-4 w-4" />
-              <span>Sign In</span>
-            </Button>
+            {session?.user ? (
+              <SignOutButton />
+            ) : (
+              <Button size="sm" className="gap-2" asChild>
+                <Link href="/login">
+                  <LogIn className="h-4 w-4" />
+                  <span>Sign In</span>
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile - Burger Menu (hidden on desktop) */}
@@ -73,11 +83,17 @@ const Header = () => {
                   <span>Cart</span>
                 </Link>
 
-                {/* Sign In Button */}
-                <Button className="justify-start gap-3 h-12">
-                  <User className="h-5 w-5" />
-                  <span>Sign In</span>
-                </Button>
+                {/* Sign In/Out Button */}
+                {session?.user ? (
+                  <SignOutButton />
+                ) : (
+                  <Button className="justify-start gap-3 h-12" asChild>
+                    <Link href="/login">
+                      <LogIn className="h-5 w-5" />
+                      <span>Sign In</span>
+                    </Link>
+                  </Button>
+                )}
               </div>
             </SheetContent>
           </Sheet>
@@ -100,6 +116,4 @@ const Header = () => {
       </div>
     </header>
   );
-};
-
-export default Header;
+}

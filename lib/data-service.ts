@@ -29,3 +29,15 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   }
   return data;
 }
+
+// Get user profile by email
+export async function getUserProfile(email: string) {
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("id, email, full_name, image, role, created_at, updated_at")
+    .eq("email", email)
+    .single();
+
+  if (error) return null;
+  return data;
+}
