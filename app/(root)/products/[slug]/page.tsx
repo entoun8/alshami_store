@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getProductBySlug } from "@/lib/data-service";
-import { Button } from "@/components/ui/button";
+import { getProductBySlug, getMyCart } from "@/lib/data-service";
 import { Badge } from "@/components/ui/badge";
+import AddToCart from "@/components/cart/AddToCart";
 
 type Params = Promise<{ slug: string }>;
 
@@ -13,6 +13,8 @@ export default async function ProductDetails({ params }: { params: Params }) {
   if (!product) {
     notFound();
   }
+
+  const cart = await getMyCart();
 
   return (
     <div className="wrapper my-8">
@@ -61,13 +63,17 @@ export default async function ProductDetails({ params }: { params: Params }) {
           </p>
 
           {/* Add to Cart Button */}
-          <Button
-            size="lg"
-            className="w-full lg:w-auto text-lg py-6 px-12"
-            disabled={product.stock === 0}
-          >
-            Add to Cart
-          </Button>
+          <AddToCart
+            item={{
+              product_id: String(product.id),
+              name: product.name,
+              slug: product.slug,
+              qty: 1,
+              image: product.image,
+              price: String(product.price),
+            }}
+            cart={cart}
+          />
         </div>
       </div>
     </div>

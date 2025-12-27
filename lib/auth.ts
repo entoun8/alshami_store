@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { getUserProfile } from "./data-service";
 import { createUserProfile } from "./actions";
+import { NextResponse } from "next/server";
 
 export const {
   auth,
@@ -59,8 +60,26 @@ export const {
       return session;
     },
 
-    authorized({ auth }) {
-      return !!auth?.user;
+    authorized({ request, auth }) {
+      const hasCartCookie = request.cookies.get("sessionCartId");
+
+      if (!hasCartCookie) {
+        const sessionCartId = crypto.randomUUID();
+
+        const newHeaders = new Headers(request.headers);
+
+        const response = NextResponse.next({
+          request: {
+            headers: newHeaders,
+          },
+        });
+
+        response.cookies.set("sessionCartId", sessionCartId);
+
+        return response;
+      }
+
+      return true;
     },
   },
 });

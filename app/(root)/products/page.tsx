@@ -1,5 +1,4 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -7,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import AddToCart from "@/components/cart/AddToCart";
 import {
   Pagination,
   PaginationContent,
@@ -18,11 +17,13 @@ import {
 } from "@/components/ui/pagination";
 import Image from "next/image";
 import Link from "next/link";
-import { getProducts } from "@/lib/data-service";
+import { getProducts, getMyCart } from "@/lib/data-service";
 
 export default async function ProductsPage() {
   const products = await getProducts();
   const totalProducts = products.length;
+
+  const cart = await getMyCart();
 
   return (
     <div className="wrapper my-8">
@@ -82,10 +83,17 @@ export default async function ProductsPage() {
             </CardContent>
 
             <CardFooter className="p-4 pt-0">
-              <Button className="w-full">
-                Add
-                <Plus className="ml-2 h-4 w-4" />
-              </Button>
+              <AddToCart
+                item={{
+                  product_id: String(product.id),
+                  name: product.name,
+                  slug: product.slug,
+                  qty: 1,
+                  image: product.image,
+                  price: String(product.price),
+                }}
+                cart={cart}
+              />
             </CardFooter>
           </Card>
         ))}

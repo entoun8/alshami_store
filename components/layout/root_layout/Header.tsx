@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Menu, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "../Logo";
-import CartIcon from "../CartIcon";
+import CartIcon from "../../cart/CartIcon";
 import {
   Sheet,
   SheetContent,
