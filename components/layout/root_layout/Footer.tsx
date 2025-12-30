@@ -5,28 +5,25 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-black text-white/80 border-t border-white/10">
+    <footer className="bg-muted text-muted-foreground border-t border-border">
       <div className="wrapper py-8">
-        {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
-          {/* Brand */}
           <div>
-            <h3 className="text-lg font-bold text-white mb-3">{APP_NAME}</h3>
+            <h3 className="h3-bold text-foreground mb-3">{APP_NAME}</h3>
             <p className="text-sm">
               Premium herbs, coffees, and more for your daily needs.
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-3">
+            <h4 className="text-sm font-semibold text-foreground mb-3">
               Quick Links
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
                   href="/products"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-foreground transition-colors"
                 >
                   Products
                 </Link>
@@ -34,7 +31,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-foreground transition-colors"
                 >
                   Contact
                 </Link>
@@ -42,14 +39,15 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-3">Support</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">
+              Support
+            </h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
                   href="/about"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-foreground transition-colors"
                 >
                   About Us
                 </Link>
@@ -57,7 +55,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/faq"
-                  className="hover:text-white transition-colors"
+                  className="hover:text-foreground transition-colors"
                 >
                   FAQ
                 </Link>
@@ -66,8 +64,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="border-t border-white/10 pt-6 text-center text-sm">
+        <div className="border-t border-border pt-6 text-center text-sm">
           <p>
             © {currentYear} {APP_NAME}. All rights reserved.
           </p>

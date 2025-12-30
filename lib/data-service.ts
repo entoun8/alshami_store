@@ -54,6 +54,34 @@ export async function getUserProfile(email: string) {
   return data;
 }
 
+// Get user profile by ID
+export async function getUserById(userId: string) {
+  const { data, error } = await supabase
+    .from("user_profile")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    throw new Error("User not found");
+  }
+
+  return data;
+}
+
+// Get cart by session cart ID
+export async function getCartBySessionId(sessionCartId: string) {
+  const { data, error } = await supabase
+    .from("cart")
+    .select("id")
+    .eq("session_cart_id", sessionCartId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return data;
+}
+
 // Get my cart
 export async function getMyCart() {
   const { cookies } = await import("next/headers");

@@ -1,8 +1,9 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { getUserProfile } from "./data-service";
-import { createUserProfile } from "./actions";
+import { getUserProfile, getCartBySessionId } from "./data-service";
+import { createUserProfile, mergeSessionCartToUser } from "./actions";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export const {
   auth,
@@ -39,13 +40,26 @@ export const {
       }
     },
 
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         const profile = await getUserProfile(user.email!);
 
         if (profile) {
           token.role = profile.role;
           token.profileId = profile.id;
+        }
+
+        if (trigger === "signIn") {
+          const cookiesObj = await cookies();
+          const sessionCartId = cookiesObj.get("sessionCartId")?.value;
+
+          if (sessionCartId && profile) {
+            const sessionCart = await getCartBySessionId(sessionCartId);
+
+            if (sessionCart) {
+              await mergeSessionCartToUser(sessionCart.id, profile.id);
+            }
+          }
         }
       }
 
@@ -61,6 +75,22 @@ export const {
     },
 
     authorized({ request, auth }) {
+      const protectedPaths = [
+        /\/shipping-address/,
+        /\/payment/,
+        /\/place-order/,
+        /\/profile/,
+        /\/user\/(.*)/,
+        /\/order\/(.*)/,
+        /\/admin/,
+      ];
+
+      const { pathname } = request.nextUrl;
+
+      if (!auth && protectedPaths.some((path) => path.test(pathname))) {
+        return false;
+      }
+
       const hasCartCookie = request.cookies.get("sessionCartId");
 
       if (!hasCartCookie) {

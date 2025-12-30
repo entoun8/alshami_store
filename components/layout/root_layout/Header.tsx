@@ -51,7 +51,7 @@ export default async function Header() {
               <SignOutButton />
             ) : (
               <Button size="sm" className="gap-2" asChild>
-                <Link href="/login">
+                <Link href="/sign-in">
                   <LogIn className="h-4 w-4" />
                   <span>Sign In</span>
                 </Link>
@@ -88,7 +88,7 @@ export default async function Header() {
                   <SignOutButton />
                 ) : (
                   <Button className="justify-start gap-3 h-12" asChild>
-                    <Link href="/login">
+                    <Link href="/sign-in">
                       <LogIn className="h-5 w-5" />
                       <span>Sign In</span>
                     </Link>

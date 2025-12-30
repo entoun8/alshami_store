@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
+import { getMyCart } from "@/lib/data-service";
 
-const CartIcon = () => {
-  const cartItemCount = 0;
+export default async function CartIcon() {
+  const cart = await getMyCart();
+  const cartItemCount = cart?.items.reduce((acc, item) => acc + item.qty, 0) || 0;
 
   return (
     <Link href="/cart" className="relative inline-block">
@@ -12,6 +14,4 @@ const CartIcon = () => {
       </span>
     </Link>
   );
-};
-
-export default CartIcon;
+}
