@@ -79,4 +79,6 @@ export const insertOrderSchema = z.object({
   order_items: z
     .array(orderItemSchema)
     .min(1, "Order must have at least one item"),
+  isPaid: z.boolean().default(false),
+  paidAt: z.string().datetime().optional().nullable(),
 });

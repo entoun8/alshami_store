@@ -46,3 +46,45 @@ export function roundTwo(value: number | string) {
     throw new Error("Value must be a number or string");
   }
 }
+
+// Shorten UUID for display (shows last 6 characters)
+// Example: "f5c1d8f4-5a09-4e0d-9f7b-93abc0" → "..93abc0"
+export function formatId(id: string) {
+  return `..${id.substring(id.length - 6).toUpperCase()}`;
+}
+
+// Format date string into multiple readable formats
+export function formatDateTime(dateString: string) {
+  const date = new Date(dateString);
+
+  const dateTime = date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+
+  const dateOnly = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const timeOnly = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  });
+
+  return { dateTime, dateOnly, timeOnly };
+}
+
+// Format currency
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "AUD",
+  }).format(amount);
+}

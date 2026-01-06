@@ -111,3 +111,55 @@ export async function getMyCart() {
     tax_price: data.tax_price.toString(),
   };
 }
+
+// Get order by ID
+export async function getOrderById(orderId: string) {
+  // Step 1: Get the order
+  const { data: order, error: orderError } = await supabase
+    .from("order")
+    .select("*")
+    .eq("id", orderId)
+    .single();
+
+  if (orderError || !order) {
+    return null;
+  }
+
+  // Step 2: Get the order items
+  const { data: orderItems, error: itemsError } = await supabase
+    .from("order_item")
+    .select("*")
+    .eq("order_id", orderId);
+
+  if (itemsError) {
+    return null;
+  }
+
+  // Step 3: Get user info (only name and email)
+  const { data: user, error: userError } = await supabase
+    .from("user_profile")
+    .select("full_name, email")
+    .eq("id", order.user_id)
+    .single();
+
+  if (userError) {
+    return null;
+  }
+
+  // Step 4: Combine everything and convert numeric fields to strings
+  return {
+    ...order,
+    items_price: order.items_price?.toString() || "0.00",
+    shipping_price: order.shipping_price?.toString() || "0.00",
+    tax_price: order.tax_price?.toString() || "0.00",
+    total_price: order.total_price?.toString() || "0.00",
+    isPaid: order.isPaid ?? false,
+    paidAt: order.paidAt ?? null,
+    order_items:
+      orderItems?.map((item) => ({
+        ...item,
+        price: item.price?.toString() || "0.00",
+      })) || [],
+    user: user,
+  };
+}

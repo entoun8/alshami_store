@@ -11,6 +11,7 @@ import {
   insertCartSchema,
   shippingAddressSchema,
   paymentMethodSchema,
+  insertOrderSchema,
 } from "./validators";
 import { getMyCart, getProductById, getUserById } from "./data-service";
 import { revalidatePath } from "next/cache";
@@ -320,6 +321,124 @@ export async function updateUserPaymentMethod(data: { type: string }) {
       message: "Payment method updated successfully",
     };
   } catch (error) {
+    return {
+      success: false,
+      message: formatError(error),
+    };
+  }
+}
+
+export async function createOrder() {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.profileId) {
+      throw new Error("User is not authenticated");
+    }
+
+    const cart = await getMyCart();
+
+    const user = await getUserById(session.user.profileId);
+
+    if (!cart || cart.items.length === 0) {
+      return {
+        success: false,
+        message: "Your cart is empty",
+        redirectTo: "/cart",
+      };
+    }
+
+    if (!user.address) {
+      return {
+        success: false,
+        message: "No shipping address",
+        redirectTo: "/shipping-address",
+      };
+    }
+
+    if (!user.payment_method) {
+      return {
+        success: false,
+        message: "No payment method",
+        redirectTo: "/payment-method",
+      };
+    }
+
+    for (const item of cart.items as CartItem[]) {
+      const product = await getProductById(item.product_id);
+
+      if (!product) {
+        return {
+          success: false,
+          message: `Product "${item.name}" not found`,
+          redirectTo: "/cart",
+        };
+      }
+
+      if (product.stock < item.qty) {
+        return {
+          success: false,
+          message: `Insufficient stock for "${item.name}". Available: ${product.stock}`,
+          redirectTo: "/cart",
+        };
+      }
+    }
+
+    const orderData = insertOrderSchema.parse({
+      user_id: session.user.profileId,
+      shipping_address: user.address,
+      payment_method: user.payment_method,
+      items_price: cart.items_price,
+      shipping_price: cart.shipping_price,
+      tax_price: cart.tax_price,
+      total_price: cart.total_price,
+      order_items: cart.items.map((item: CartItem) => ({
+        product_id: Number(item.product_id),
+        name: item.name,
+        slug: item.slug,
+        quantity: item.qty,
+        price: item.price,
+        image: item.image,
+      })),
+      isPaid: false,
+      paidAt: null,
+    });
+
+    const { data: orderId, error: orderError } = await supabase.rpc(
+      "create_order_atomic",
+      {
+        p_user_id: orderData.user_id,
+        p_shipping_address: orderData.shipping_address,
+        p_payment_method: orderData.payment_method,
+        p_items_price: orderData.items_price,
+        p_shipping_price: orderData.shipping_price,
+        p_tax_price: orderData.tax_price,
+        p_total_price: orderData.total_price,
+        p_order_items: orderData.order_items,
+        p_cart_id: cart.id,
+        p_ispaid: orderData.isPaid,
+        p_paidat: orderData.paidAt,
+      }
+    );
+
+    if (orderError || !orderId) {
+      throw new Error(
+        `Failed to create order: ${orderError?.message || "Unknown error"}`
+      );
+    }
+
+    revalidatePath("/cart");
+
+    return {
+      success: true,
+      message: "Order created successfully",
+      redirectTo: `/order/${orderId}`,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
+    }
+
     return {
       success: false,
       message: formatError(error),

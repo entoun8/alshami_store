@@ -2,6 +2,7 @@ import { Cart } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 type OrderSummaryProps = {
   cart: Cart;
@@ -32,9 +33,11 @@ export default function OrderSummary({ cart }: OrderSummaryProps) {
             </div>
           </div>
         </div>
-        <Button className="w-full mt-6 bg-primary text-primary-foreground">
-          Proceed to Checkout
-          <ArrowRight className="ml-2 h-4 w-4" />
+        <Button className="w-full mt-6 bg-primary text-primary-foreground" asChild>
+          <Link href="/shipping-address">
+            Proceed to Checkout
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       </CardContent>
     </Card>
