@@ -6,8 +6,7 @@ import heroBackground from "@/public/images/hero_img.jpg";
 
 export default function HomePage() {
   return (
-    <section className="relative h-[calc(100vh-92px)] md:h-[calc(100vh-56px)] flex items-center justify-center">
-      {/* Background Image */}
+    <section className="relative h-[calc(100vh-56px)] md:h-[calc(100vh-92px)] flex items-center justify-center">
       <Image
         src={heroBackground}
         alt="Hero background"
@@ -18,7 +17,7 @@ export default function HomePage() {
       />
 
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-foreground/60" />
+      <div className="absolute inset-0 bg-black/60" />
 
       {/* Hero Content */}
       <div className="wrapper relative z-10 text-center">
