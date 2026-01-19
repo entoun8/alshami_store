@@ -1,5 +1,7 @@
+import { cookies } from "next/headers";
 import { supabase, supabaseAdmin } from "./supabase";
-import { Product } from "@/types";
+import { auth } from "./auth";
+import { Product, OrderSummary } from "@/types";
 
 export async function getProducts(category?: string): Promise<Product[]> {
   let query = supabase
@@ -97,9 +99,6 @@ export async function getCartBySessionId(sessionCartId: string) {
 }
 
 export async function getMyCart() {
-  const { cookies } = await import("next/headers");
-  const { auth } = await import("./auth");
-
   const cookieStore = await cookies();
   const sessionCartId = cookieStore.get("sessionCartId")?.value || null;
 
@@ -170,4 +169,43 @@ export async function getOrderById(orderId: string) {
       })) || [],
     user: user,
   };
+}
+
+export async function getUserOrders(): Promise<OrderSummary[]> {
+  const session = await auth();
+  const profileId = session?.user?.profileId;
+
+  if (!profileId) {
+    return [];
+  }
+
+  const { data: orders, error } = await supabaseAdmin
+    .from("order")
+    .select("id, created_at, isPaid, paidAt, total_price")
+    .eq("user_id", profileId)
+    .order("created_at", { ascending: false });
+
+  if (error || !orders) {
+    return [];
+  }
+
+  const orderSummaries: OrderSummary[] = await Promise.all(
+    orders.map(async (order) => {
+      const { count } = await supabaseAdmin
+        .from("order_item")
+        .select("*", { count: "exact", head: true })
+        .eq("order_id", order.id);
+
+      return {
+        id: order.id,
+        created_at: order.created_at,
+        isPaid: order.isPaid ?? false,
+        paidAt: order.paidAt ?? null,
+        itemCount: count ?? 0,
+        total_price: order.total_price?.toString() || "0.00",
+      };
+    }),
+  );
+
+  return orderSummaries;
 }

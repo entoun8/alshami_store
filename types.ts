@@ -36,6 +36,15 @@ export type UserProfile = {
   updated_at: string;
 };
 
+export type OrderSummary = {
+  id: string;
+  created_at: string;
+  isPaid: boolean;
+  paidAt: string | null;
+  itemCount: number;
+  total_price: string;
+};
+
 declare module "next-auth" {
   interface Session {
     user: {

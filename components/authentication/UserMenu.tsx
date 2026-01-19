@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SignOutButton from "./SignOutButton";
-import { User } from "lucide-react";
+import { User, ShoppingBag } from "lucide-react";
 
 interface UserMenuProps {
   user: {
@@ -61,6 +61,12 @@ export default function UserMenu({ user }: UserMenuProps) {
           <Link href="/user/profile" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
             Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/user/orders" className="flex items-center">
+            <ShoppingBag className="mr-2 h-4 w-4" />
+            Orders
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
