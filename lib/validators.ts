@@ -82,3 +82,8 @@ export const insertOrderSchema = z.object({
   isPaid: z.boolean().default(false),
   paidAt: z.string().datetime().optional().nullable(),
 });
+
+export const updateProfileSchema = z.object({
+  fullName: z.string().min(3, "Name must be at least 3 characters"),
+  address: shippingAddressSchema,
+});

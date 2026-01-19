@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -11,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SignOutButton from "./SignOutButton";
+import { User } from "lucide-react";
 
 interface UserMenuProps {
   user: {
@@ -55,6 +57,12 @@ export default function UserMenu({ user }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/user/profile" className="flex items-center">
+            <User className="mr-2 h-4 w-4" />
+            Profile
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={(e) => {
             e.preventDefault();

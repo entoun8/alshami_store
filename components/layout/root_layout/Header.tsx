@@ -14,12 +14,16 @@ import {
 import auth from "@/middleware";
 import UserMenu from "@/components/authentication/UserMenu";
 import { ThemeToggle } from "../ThemeToggle";
+import { SearchTrigger } from "@/components/search/SearchTrigger";
+import { getProducts } from "@/lib/data-service";
 
 export default async function Header() {
   const session = await auth();
+  const products = await getProducts();
 
   const navLinks = [
     { href: "/products", label: "Products" },
+    { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
 
@@ -30,6 +34,7 @@ export default async function Header() {
 
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2">
+            <SearchTrigger products={products} />
             <Link href="/cart">
               <CartIcon />
             </Link>
@@ -80,8 +85,15 @@ export default async function Header() {
 
                 <div className="flex flex-col gap-3">
                   <h3 className="text-xs font-semibold text-muted-foreground px-3">
-                    Account
+                    Quick Actions
                   </h3>
+
+                  <div className="flex items-center h-10 px-3 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <SearchTrigger products={products} />
+                    <span className="text-sm font-medium ml-1">
+                      Search Products
+                    </span>
+                  </div>
 
                   <Link
                     href="/cart"

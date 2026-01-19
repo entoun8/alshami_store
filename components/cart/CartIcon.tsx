@@ -1,9 +1,10 @@
 import { ShoppingCart } from "lucide-react";
 import { getMyCart } from "@/lib/data-service";
+import { CartItem } from "@/types";
 
 export default async function CartIcon() {
   const cart = await getMyCart();
-  const cartItemCount = cart?.items.reduce((acc, item) => acc + item.qty, 0) || 0;
+  const cartItemCount = cart?.items?.reduce((acc: number, item: CartItem) => acc + item.qty, 0) || 0;
 
   return (
     <div className="relative inline-block">

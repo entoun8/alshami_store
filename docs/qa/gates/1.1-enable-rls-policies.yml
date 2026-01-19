@@ -1,0 +1,85 @@
+# Quality Gate: Story 1.1
+schema: 1
+story: "1.1"
+story_title: "Enable Row Level Security Policies"
+gate: PASS
+status_reason: "All 9 acceptance criteria verified. RLS enabled on all 5 tables with correct policies. Function search_path security fixed. No ERROR-level security advisories."
+reviewer: "Quinn (Test Architect)"
+updated: "2026-01-18T12:00:00Z"
+
+waiver: { active: false }
+
+top_issues: []
+
+risk_summary:
+  totals: { critical: 0, high: 0, medium: 0, low: 0 }
+  recommendations:
+    must_fix: []
+    monitor:
+      - "user_profile INSERT policy is permissive (by design for registration)"
+      - "Leaked password protection disabled (N/A - OAuth only)"
+
+quality_score: 100
+expires: "2026-02-01T00:00:00Z"
+
+evidence:
+  tests_reviewed: 7
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: "RLS enabled on all tables. Policies correctly enforce row-level access control. Function search_path vulnerabilities fixed."
+  performance:
+    status: PASS
+    notes: "Standard RLS overhead. Admin role checks use indexed lookups. EXISTS subqueries on FK columns are efficient."
+  reliability:
+    status: PASS
+    notes: "Policies use graceful fallbacks (current_setting with true param). Service role bypasses RLS for webhooks."
+  maintainability:
+    status: PASS
+    notes: "Clear policy naming convention. Implementation documented in Dev Notes with SQL reference."
+
+recommendations:
+  immediate: []
+  future:
+    - action: "Consider adding RLS policies for UPDATE/DELETE on order table for admin use cases"
+      refs: ["order table policies"]
+    - action: "Monitor cart session_cart_id cookie access pattern for edge cases"
+      refs: ["cart policies"]
+
+verification_details:
+  rls_enabled:
+    - table: "Product"
+      status: true
+      policies: ["Anyone can view products", "Admins can insert products", "Admins can update products", "Admins can delete products"]
+    - table: "cart"
+      status: true
+      policies: ["Users can view own cart", "Users can insert own cart", "Users can update own cart", "Users can delete own cart"]
+    - table: "order"
+      status: true
+      policies: ["Users can view own orders", "Authenticated users can create orders"]
+    - table: "order_item"
+      status: true
+      policies: ["Users can view own order items", "Authenticated users can insert order items"]
+    - table: "user_profile"
+      status: true
+      policies: ["Anyone can view profiles", "Users can insert own profile", "Users can update own profile"]
+
+  functions_secured:
+    - name: "create_order_atomic (9-param)"
+      search_path: ""
+    - name: "create_order_atomic (11-param)"
+      search_path: ""
+    - name: "update_updated_at_column"
+      search_path: ""
+
+  supabase_advisors:
+    errors: 0
+    warnings: 2
+    warnings_detail:
+      - "rls_policy_always_true: user_profile INSERT (by design)"
+      - "auth_leaked_password_protection: disabled (OAuth only)"

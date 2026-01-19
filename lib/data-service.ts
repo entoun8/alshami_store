@@ -1,12 +1,17 @@
-import { supabase } from "./supabase";
+import { supabase, supabaseAdmin } from "./supabase";
 import { Product } from "@/types";
 
-// Get all products
-export async function getProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
+export async function getProducts(category?: string): Promise<Product[]> {
+  let query = supabase
     .from("Product")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error("Products could not be loaded");
@@ -14,7 +19,20 @@ export async function getProducts(): Promise<Product[]> {
   return data;
 }
 
-// Get product by slug
+export async function getCategories(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("Product")
+    .select("category")
+    .order("category");
+
+  if (error) {
+    throw new Error("Categories could not be loaded");
+  }
+
+  const uniqueCategories = [...new Set(data.map((item) => item.category))];
+  return uniqueCategories;
+}
+
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const { data, error } = await supabase
     .from("Product")
@@ -28,7 +46,6 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   return data;
 }
 
-// Get product by ID
 export async function getProductById(id: string): Promise<Product | null> {
   const { data, error } = await supabase
     .from("Product")
@@ -42,7 +59,6 @@ export async function getProductById(id: string): Promise<Product | null> {
   return data;
 }
 
-// Get user profile by email
 export async function getUserProfile(email: string) {
   const { data, error } = await supabase
     .from("user_profile")
@@ -54,7 +70,6 @@ export async function getUserProfile(email: string) {
   return data;
 }
 
-// Get user profile by ID
 export async function getUserById(userId: string) {
   const { data, error } = await supabase
     .from("user_profile")
@@ -69,7 +84,6 @@ export async function getUserById(userId: string) {
   return data;
 }
 
-// Get cart by session cart ID
 export async function getCartBySessionId(sessionCartId: string) {
   const { data, error } = await supabase
     .from("cart")
@@ -82,7 +96,6 @@ export async function getCartBySessionId(sessionCartId: string) {
   return data;
 }
 
-// Get my cart
 export async function getMyCart() {
   const { cookies } = await import("next/headers");
   const { auth } = await import("./auth");
@@ -112,10 +125,8 @@ export async function getMyCart() {
   };
 }
 
-// Get order by ID
 export async function getOrderById(orderId: string) {
-  // Step 1: Get the order
-  const { data: order, error: orderError } = await supabase
+  const { data: order, error: orderError } = await supabaseAdmin
     .from("order")
     .select("*")
     .eq("id", orderId)
@@ -125,8 +136,7 @@ export async function getOrderById(orderId: string) {
     return null;
   }
 
-  // Step 2: Get the order items
-  const { data: orderItems, error: itemsError } = await supabase
+  const { data: orderItems, error: itemsError } = await supabaseAdmin
     .from("order_item")
     .select("*")
     .eq("order_id", orderId);
@@ -135,7 +145,6 @@ export async function getOrderById(orderId: string) {
     return null;
   }
 
-  // Step 3: Get user info (only name and email)
   const { data: user, error: userError } = await supabase
     .from("user_profile")
     .select("full_name, email")
@@ -146,7 +155,6 @@ export async function getOrderById(orderId: string) {
     return null;
   }
 
-  // Step 4: Combine everything and convert numeric fields to strings
   return {
     ...order,
     items_price: order.items_price?.toString() || "0.00",

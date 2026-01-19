@@ -14,6 +14,7 @@ npm run dev        # Start development server at http://localhost:3000
 npm run build      # Create production build
 npm start          # Start production server (run build first)
 npm run lint       # Run ESLint
+npm run seed       # Seed products to database (tsx scripts/seed-products.ts)
 ```
 
 ### Installing shadcn/ui Components
@@ -33,24 +34,48 @@ Components install to `components/ui/` with the following configuration:
 
 ```
 app/
-├── (root)/          # Route group for main pages
-│   ├── layout.tsx   # Root group layout wrapper
-│   └── page.tsx     # Home page
-├── layout.tsx       # Root layout (metadata, fonts, global providers)
-└── globals.css      # Global styles, CSS variables, utility classes
+├── (auth)/              # Auth route group
+│   └── sign-in/         # Sign-in page
+├── (root)/              # Route group for main pages
+│   ├── layout.tsx       # Root group layout wrapper
+│   ├── page.tsx         # Home page
+│   ├── products/        # Products listing and detail pages
+│   │   ├── page.tsx     # Products page with filtering
+│   │   ├── loading.tsx  # Loading skeleton
+│   │   └── [slug]/      # Product detail page
+│   ├── cart/            # Shopping cart page
+│   ├── shipping-address/# Checkout: shipping address
+│   ├── payment-method/  # Checkout: payment method
+│   ├── place-order/     # Checkout: order review
+│   ├── order/[id]/      # Order details & payment
+│   ├── about/           # About page
+│   └── contact/         # Contact page
+├── layout.tsx           # Root layout (metadata, fonts, global providers)
+├── globals.css          # Global styles, CSS variables, utility classes
+├── error.tsx            # Global error boundary
+├── not-found.tsx        # 404 page
+└── loading.tsx          # Global loading state
 
 components/
-└── ui/              # shadcn/ui components (auto-installed)
+├── ui/                  # shadcn/ui components (auto-installed)
+├── authentication/      # SignInButton, SignOutButton, UserMenu
+├── cart/                # AddToCart, CartView, CartItem, CartIcon, OrderSummary
+├── checkout/            # CheckoutSteps, ShippingAddressForm, PaymentMethodForm, PlaceOrderButton, StripePayment
+├── layout/              # Header, Footer, Logo, ThemeToggle
+│   └── root_layout/     # Root layout components (Header, Footer)
+├── products/            # ProductCard, ProductList, CategoryFilter, ProductPagination, Skeletons
+└── providers/           # ThemeProvider
 
 lib/
-├── constants.ts     # App constants (APP_NAME, APP_DESCRIPTION, SERVER_URL)
-├── utils.ts         # Utility functions (cn() for class merging)
+├── constants.ts     # App constants (APP_NAME, PAYMENT_METHODS, etc.)
+├── utils.ts         # Utility functions (cn(), formatNumberWithDecimal())
 ├── supabase.ts      # Supabase client configuration
+├── auth.ts          # NextAuth configuration
 ├── data-service.ts  # Database read operations (Server Components)
 ├── actions.ts       # Server Actions for mutations (CREATE/UPDATE/DELETE)
 └── validators.ts    # Zod validation schemas
 
-types.ts             # TypeScript type definitions (Product, etc.)
+types.ts             # TypeScript type definitions (Product, Cart, Order, etc.)
 ```
 
 ### Key Patterns
@@ -224,6 +249,17 @@ export default async function ProductsPage() {
 }
 ```
 
+**Available Data Functions:**
+- `getProducts(category?)` - Get all products, optionally filtered by category
+- `getCategories()` - Get unique product categories
+- `getProductBySlug(slug)` - Get single product by slug
+- `getProductById(id)` - Get single product by ID
+- `getUserProfile(email)` - Get user profile by email
+- `getUserById(userId)` - Get user by ID
+- `getMyCart()` - Get current user's cart (uses cookies/session)
+- `getCartBySessionId(sessionCartId)` - Get cart by session ID
+- `getOrderById(orderId)` - Get order with items and user info
+
 **Write Operations** - Use Server Actions in `lib/actions.ts`:
 ```tsx
 "use server"
@@ -242,21 +278,50 @@ export async function createProduct(formData: FormData) {
 - Always validate with Zod schemas from `lib/validators.ts`
 - Types defined in `types.ts` using Zod inference
 
-### Product Schema
+### Database Tables
 
-**Database Table:** `Product`
+**Product Table:**
 - `id` (string/UUID)
-- `name` (string, min 3 chars)
-- `slug` (string, min 3 chars, unique)
-- `category` (string, min 3 chars)
-- `brand` (string, min 3 chars)
-- `description` (string, min 3 chars)
+- `name`, `slug`, `category`, `brand`, `description` (string, min 3 chars)
 - `stock` (number, positive integer)
 - `image` (string, required)
 - `price` (string with 2 decimals)
 - `created_at` (timestamp)
 
-**Validation:** See `lib/validators.ts` - `insertProductSchema`
+**Cart Table:**
+- `id`, `session_cart_id`, `user_id`
+- `items` (JSON array of cart items)
+- `items_price`, `shipping_price`, `tax_price`, `total_price` (currency)
+
+**Order Table:**
+- `id`, `user_id`
+- `shipping_address` (JSON)
+- `payment_method` (string)
+- `items_price`, `shipping_price`, `tax_price`, `total_price` (currency)
+- `isPaid`, `paidAt`
+- Related: `order_item` table for order line items
+
+**User Profile Table:**
+- `id`, `email`, `full_name`, `image`, `role`
+- `created_at`, `updated_at`
+
+### Validation Schemas
+
+All validation schemas are in `lib/validators.ts`:
+- `insertProductSchema` - Product creation/update
+- `cartItemSchema` - Individual cart items
+- `insertCartSchema` - Full cart with items and prices
+- `shippingAddressSchema` - Shipping address form
+- `paymentMethodSchema` - Payment method selection
+- `orderItemSchema` - Order line items
+- `insertOrderSchema` - Full order creation
+
+### Authentication
+
+Using **NextAuth v5** (beta) with the following setup:
+- Configuration in `lib/auth.ts`
+- Session includes: `id`, `name`, `email`, `image`, `profileId`, `role`
+- Types extended in `types.ts` via module augmentation
 
 ## Important Constants
 
@@ -264,6 +329,8 @@ Defined in `lib/constants.ts`:
 - `APP_NAME`: "Alshami"
 - `APP_DESCRIPTION`: "A modern e-commerce platform for premium herbs, coffees, and more."
 - `SERVER_URL`: "http://localhost:3000"
+- `PAYMENT_METHODS`: ["Stripe"]
+- `DEFAULT_PAYMENT_METHOD`: "Stripe"
 
 Used in root layout for metadata configuration.
 
@@ -293,6 +360,22 @@ Used in root layout for metadata configuration.
 - **Icon library**: Lucide React (via shadcn/ui)
 - **Animation utilities**: `tw-animate-css` package available
 - **Class variance**: Uses `class-variance-authority` for component variants
+- **Toast notifications**: Using `sonner` package
+- **Theme switching**: Using `next-themes` package
+- **Form handling**: Using `react-hook-form` with `@hookform/resolvers` for Zod integration
+- **Payment processing**: Stripe integration via `@stripe/stripe-js` and `@stripe/react-stripe-js`
+
+## Key Dependencies
+
+```
+next: 16.0.10
+react: 19.2.1
+next-auth: 5.0.0-beta.30
+@supabase/supabase-js: 2.87.3
+zod: 4.2.1
+stripe: 20.1.0
+tailwindcss: 4
+```
 
 ## Documentation References
 

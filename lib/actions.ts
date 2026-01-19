@@ -1,7 +1,7 @@
 "use server";
 
 import { signIn, signOut } from "./auth";
-import { supabase } from "./supabase";
+import { supabase, supabaseAdmin } from "./supabase";
 import { CartItem, ShippingAddress } from "@/types";
 import { auth } from "./auth";
 import { cookies } from "next/headers";
@@ -12,6 +12,7 @@ import {
   shippingAddressSchema,
   paymentMethodSchema,
   insertOrderSchema,
+  updateProfileSchema,
 } from "./validators";
 import { getMyCart, getProductById, getUserById } from "./data-service";
 import { revalidatePath } from "next/cache";
@@ -250,7 +251,7 @@ export async function updateUserAddress(data: ShippingAddress) {
 
     const address = shippingAddressSchema.parse(data);
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from("user_profile")
       .update({ address })
       .eq("id", currentUser.id);
@@ -303,7 +304,7 @@ export async function updateUserPaymentMethod(data: { type: string }) {
 
     const paymentMethod = paymentMethodSchema.parse(data);
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from("user_profile")
       .update({ payment_method: paymentMethod.type })
       .eq("id", currentUser.id);
@@ -404,7 +405,7 @@ export async function createOrder() {
       paidAt: null,
     });
 
-    const { data: orderId, error: orderError } = await supabase.rpc(
+    const { data: orderId, error: orderError } = await supabaseAdmin.rpc(
       "create_order_atomic",
       {
         p_user_id: orderData.user_id,
@@ -443,5 +444,44 @@ export async function createOrder() {
       success: false,
       message: formatError(error),
     };
+  }
+}
+
+export async function updateUserProfile(data: {
+  fullName: string;
+  address: {
+    fullName: string;
+    streetAddress: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.profileId) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    const validated = updateProfileSchema.parse(data);
+
+    const { error } = await supabaseAdmin
+      .from("user_profile")
+      .update({
+        full_name: validated.fullName,
+        address: validated.address,
+      })
+      .eq("id", session.user.profileId);
+
+    if (error) {
+      throw new Error(`Failed to update profile: ${error.message}`);
+    }
+
+    revalidatePath("/user/profile");
+
+    return { success: true, message: "Profile updated successfully" };
+  } catch (error) {
+    return { success: false, message: await formatError(error) };
   }
 }

@@ -87,7 +87,7 @@ export default async function StripePaymentSuccessPage(props: Props) {
                 <Link href={`/order/${id}`}>View Order Details</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/">Continue Shopping</Link>
+                <Link href="/products">Continue Shopping</Link>
               </Button>
             </div>
           </CardContent>

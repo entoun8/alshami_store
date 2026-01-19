@@ -18,7 +18,7 @@ export const {
     }),
   ],
   pages: {
-    signIn: "/login",
+    signIn: "/sign-in",
   },
   callbacks: {
     async signIn({ user }) {

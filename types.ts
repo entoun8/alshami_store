@@ -24,6 +24,18 @@ export type Order = z.infer<typeof insertOrderSchema> & {
   created_at: string;
 };
 
+export type UserProfile = {
+  id: string;
+  email: string;
+  full_name: string;
+  image: string | null;
+  role: string;
+  address: ShippingAddress | null;
+  payment_method: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 declare module "next-auth" {
   interface Session {
     user: {
