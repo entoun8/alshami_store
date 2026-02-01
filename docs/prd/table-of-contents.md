@@ -5,6 +5,7 @@
 3. [User Interface Enhancement Goals](#3-user-interface-enhancement-goals)
 4. [Technical Constraints and Integration Requirements](#4-technical-constraints-and-integration-requirements)
 5. [Epic and Story Structure](#5-epic-and-story-structure)
-6. [Epic 1: Production Readiness](#6-epic-1-alshami-store-production-readiness)
+6. [Epic 1: Alshami Store Production Readiness](#6-epic-1-alshami-store-production-readiness)
+7. [Epic 2: Production Readiness & Polish](#7-epic-2-production-readiness-polish)
 
 ---

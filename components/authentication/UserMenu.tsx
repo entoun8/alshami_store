@@ -12,13 +12,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SignOutButton from "./SignOutButton";
-import { User, ShoppingBag } from "lucide-react";
+import { User, ShoppingBag, Settings } from "lucide-react";
 
 interface UserMenuProps {
   user: {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    role?: string | null;
   };
 }
 
@@ -69,6 +70,17 @@ export default function UserMenu({ user }: UserMenuProps) {
             Orders
           </Link>
         </DropdownMenuItem>
+        {user.role === "admin" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/admin/products" className="flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                Admin
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuItem
           onSelect={(e) => {
             e.preventDefault();

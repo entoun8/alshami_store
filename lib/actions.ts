@@ -13,6 +13,7 @@ import {
   paymentMethodSchema,
   insertOrderSchema,
   updateProfileSchema,
+  insertProductSchema,
 } from "./validators";
 import { getMyCart, getProductById, getUserById } from "./data-service";
 import { revalidatePath } from "next/cache";
@@ -482,6 +483,176 @@ export async function updateUserProfile(data: {
 
     return { success: true, message: "Profile updated successfully" };
   } catch (error) {
-    return { success: false, message: await formatError(error) };
+    return { success: false, message: formatError(error) };
+  }
+}
+
+// Admin Product Actions
+export async function createProduct(
+  data: {
+    name: string;
+    slug: string;
+    category: string;
+    brand: string;
+    description: string;
+    stock: number;
+    image: string;
+    price: string;
+  }
+): Promise<{ success: boolean; message: string; productId?: string }> {
+  try {
+    const session = await auth();
+
+    if (session?.user?.role !== "admin") {
+      return { success: false, message: "Forbidden: Admin access required" };
+    }
+
+    const validated = insertProductSchema.parse(data);
+
+    const { data: product, error } = await supabaseAdmin
+      .from("Product")
+      .insert([validated])
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create product: ${error.message}`);
+    }
+
+    revalidatePath("/products");
+    revalidatePath("/admin/products");
+
+    return {
+      success: true,
+      message: "Product created successfully",
+      productId: product.id.toString(),
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+export async function updateProduct(
+  productId: number,
+  data: {
+    name: string;
+    slug: string;
+    category: string;
+    brand: string;
+    description: string;
+    stock: number;
+    image: string;
+    price: string;
+  }
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const session = await auth();
+
+    if (session?.user?.role !== "admin") {
+      return { success: false, message: "Forbidden: Admin access required" };
+    }
+
+    const validated = insertProductSchema.parse(data);
+
+    const { error } = await supabaseAdmin
+      .from("Product")
+      .update(validated)
+      .eq("id", productId);
+
+    if (error) {
+      throw new Error(`Failed to update product: ${error.message}`);
+    }
+
+    revalidatePath("/products");
+    revalidatePath(`/products/${validated.slug}`);
+    revalidatePath("/admin/products");
+
+    return { success: true, message: "Product updated successfully" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+export async function deleteProduct(
+  productId: number
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const session = await auth();
+
+    if (session?.user?.role !== "admin") {
+      return { success: false, message: "Forbidden: Admin access required" };
+    }
+
+    const { error } = await supabaseAdmin
+      .from("Product")
+      .delete()
+      .eq("id", productId);
+
+    if (error) {
+      throw new Error(`Failed to delete product: ${error.message}`);
+    }
+
+    revalidatePath("/products");
+    revalidatePath("/admin/products");
+
+    return { success: true, message: "Product deleted successfully" };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
+
+export async function uploadProductImage(
+  formData: FormData
+): Promise<{ success: boolean; message: string; url?: string }> {
+  try {
+    // 1. Verify admin role
+    const session = await auth();
+    if (session?.user?.role !== "admin") {
+      return { success: false, message: "Forbidden: Admin access required" };
+    }
+
+    // 2. Extract file from FormData
+    const file = formData.get("file") as File | null;
+    if (!file) {
+      return { success: false, message: "No file provided" };
+    }
+
+    // 3. Validate file type (jpg, png, webp only)
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      return { success: false, message: "Only JPG, PNG, WebP images allowed" };
+    }
+
+    // 4. Validate file size (max 2MB)
+    const maxSize = 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return { success: false, message: "Image must be less than 2MB" };
+    }
+
+    // 5. Generate unique filename (uuid + extension)
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const filename = `${crypto.randomUUID()}.${ext}`;
+
+    // 6. Upload to 'products' bucket via Supabase admin client
+    const { error } = await supabaseAdmin.storage
+      .from("products")
+      .upload(filename, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Upload error:", error);
+      return { success: false, message: "Failed to upload image" };
+    }
+
+    // 7. Get public URL
+    const { data: urlData } = supabaseAdmin.storage
+      .from("products")
+      .getPublicUrl(filename);
+
+    return { success: true, message: "Image uploaded", url: urlData.publicUrl };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
   }
 }

@@ -12,7 +12,7 @@ export function formatNumberWithDecimal(num: number | string): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function formatError(error: any) {
+export function formatError(error: any) {
   if (error.issues && Array.isArray(error.issues)) {
     const fieldErrors = error.issues.map(
       (err: { message: string }) => err.message

@@ -171,6 +171,18 @@ export async function getOrderById(orderId: string) {
   };
 }
 
+export async function getAllProducts(): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from("Product")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error("Products could not be loaded");
+  }
+  return data || [];
+}
+
 export async function getUserOrders(): Promise<OrderSummary[]> {
   const session = await auth();
   const profileId = session?.user?.profileId;
