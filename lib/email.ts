@@ -22,12 +22,45 @@ export async function sendOrderConfirmation(
 ): Promise<void> {
   const { user_profile, order_item, ...orderData } = order;
 
-  await resend.emails.send({
-    from: process.env.EMAIL_FROM_ADDRESS || "orders@alshami.com",
-    to: user_profile.email,
-    subject: `Order Confirmation - #${orderData.id.slice(0, 8).toUpperCase()}`,
-    html: generateOrderEmailHtml(orderData, order_item, user_profile),
-  });
+  // Validate required data before attempting to send
+  if (!user_profile) {
+    console.error("Email send failed: user_profile is null or undefined");
+    throw new Error("Cannot send email: user profile missing");
+  }
+
+  if (!user_profile.email) {
+    console.error("Email send failed: user_profile.email is null or undefined");
+    throw new Error("Cannot send email: user email missing");
+  }
+
+  if (!order_item || order_item.length === 0) {
+    console.error("Email send failed: order_item is empty or undefined");
+    throw new Error("Cannot send email: order items missing");
+  }
+
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS || "onboarding@resend.dev";
+
+  console.log("=== EMAIL SEND ATTEMPT ===");
+  console.log("Order ID:", orderData.id);
+  console.log("To:", user_profile.email);
+  console.log("From:", fromAddress);
+  console.log("Items count:", order_item.length);
+
+  try {
+    const result = await resend.emails.send({
+      from: fromAddress,
+      to: user_profile.email,
+      subject: `Order Confirmation - #${orderData.id.slice(0, 8).toUpperCase()}`,
+      html: generateOrderEmailHtml(orderData, order_item, user_profile),
+    });
+
+    console.log("=== EMAIL SEND SUCCESS ===");
+    console.log("Resend response:", JSON.stringify(result, null, 2));
+  } catch (error) {
+    console.error("=== EMAIL SEND FAILED ===");
+    console.error("Resend API error:", error);
+    throw error; // Re-throw to be caught by webhook handler
+  }
 }
 
 /**

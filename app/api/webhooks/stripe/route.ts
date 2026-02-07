@@ -61,13 +61,24 @@ export async function POST(request: NextRequest) {
 
       // 5. Send order confirmation email (non-blocking - failures won't break webhook)
       if (order) {
+        console.log("=== WEBHOOK: ORDER DATA FOR EMAIL ===");
+        console.log("Order ID:", order.id);
+        console.log("User profile present:", !!order.user_profile);
+        console.log("User email:", order.user_profile?.email);
+        console.log("Order items count:", order.order_item?.length ?? 0);
+
         try {
           await sendOrderConfirmation(order);
+          console.log("=== WEBHOOK: EMAIL SENT SUCCESSFULLY ===");
         } catch (emailError) {
           // Log email error but continue - order is already marked paid
-          console.error("Failed to send order confirmation email:", emailError);
+          console.error("=== WEBHOOK: EMAIL SEND FAILED ===");
+          console.error("Error details:", emailError);
           // Don't return error - webhook must return 200 to prevent Stripe retries
         }
+      } else {
+        console.error("=== WEBHOOK: ORDER DATA IS NULL ===");
+        console.error("Could not retrieve order after update");
       }
     }
   }
