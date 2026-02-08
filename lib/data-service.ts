@@ -183,6 +183,37 @@ export async function getAllProducts(): Promise<Product[]> {
   return data || [];
 }
 
+export async function checkSlugExists(
+  slug: string,
+  excludeProductId?: number
+): Promise<boolean> {
+  let query = supabase.from("Product").select("id").eq("slug", slug);
+
+  if (excludeProductId) {
+    query = query.neq("id", excludeProductId);
+  }
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    return false;
+  }
+
+  return !!data;
+}
+
+export async function findUniqueSlug(baseSlug: string): Promise<string> {
+  let slug = baseSlug;
+  let counter = 2;
+
+  while (await checkSlugExists(slug)) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  return slug;
+}
+
 export async function getUserOrders(): Promise<OrderSummary[]> {
   const session = await auth();
   const profileId = session?.user?.profileId;

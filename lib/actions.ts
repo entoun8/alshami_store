@@ -15,7 +15,7 @@ import {
   updateProfileSchema,
   insertProductSchema,
 } from "./validators";
-import { getMyCart, getProductById, getUserById } from "./data-service";
+import { getMyCart, getProductById, getUserById, findUniqueSlug } from "./data-service";
 import { revalidatePath } from "next/cache";
 
 export async function signInAction() {
@@ -487,6 +487,18 @@ export async function updateUserProfile(data: {
   }
 }
 
+// Get unique slug for product creation (client-side preview)
+export async function getUniqueSlug(
+  slug: string
+): Promise<{ success: boolean; slug: string }> {
+  try {
+    const uniqueSlug = await findUniqueSlug(slug);
+    return { success: true, slug: uniqueSlug };
+  } catch {
+    return { success: false, slug };
+  }
+}
+
 // Admin Product Actions
 export async function createProduct(
   data: {
@@ -509,9 +521,12 @@ export async function createProduct(
 
     const validated = insertProductSchema.parse(data);
 
+    // Ensure slug uniqueness - append numeric suffix if needed
+    const uniqueSlug = await findUniqueSlug(validated.slug);
+
     const { data: product, error } = await supabaseAdmin
       .from("Product")
-      .insert([validated])
+      .insert([{ ...validated, slug: uniqueSlug }])
       .select()
       .single();
 

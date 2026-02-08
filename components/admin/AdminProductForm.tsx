@@ -20,9 +20,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { insertProductSchema } from "@/lib/validators";
-import { createProduct, updateProduct } from "@/lib/actions";
+import { createProduct, updateProduct, getUniqueSlug } from "@/lib/actions";
 import { Product } from "@/types";
 import ImageUpload from "@/components/admin/ImageUpload";
+import { generateSlug } from "@/lib/utils";
 
 import { Loader } from "lucide-react";
 
@@ -83,6 +84,24 @@ export default function AdminProductForm({ product }: AdminProductFormProps) {
                         placeholder="Product name"
                         className="bg-background border-input"
                         {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          if (!isEditing) {
+                            form.setValue("slug", generateSlug(e.target.value));
+                          }
+                        }}
+                        onBlur={async (e) => {
+                          field.onBlur();
+                          if (!isEditing && e.target.value.trim()) {
+                            const slug = generateSlug(e.target.value);
+                            if (slug) {
+                              const result = await getUniqueSlug(slug);
+                              if (result.success) {
+                                form.setValue("slug", result.slug);
+                              }
+                            }
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -98,11 +117,17 @@ export default function AdminProductForm({ product }: AdminProductFormProps) {
                     <FormLabel>Slug</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="product-slug"
-                        className="bg-background border-input"
+                        placeholder={isEditing ? "" : "auto-generated-from-name"}
+                        className="bg-muted text-muted-foreground cursor-not-allowed border-input"
+                        readOnly
                         {...field}
                       />
                     </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      {isEditing
+                        ? "Slug cannot be changed after creation"
+                        : "Auto-generated from product name"}
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

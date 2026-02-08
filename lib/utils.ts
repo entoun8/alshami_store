@@ -88,3 +88,18 @@ export function formatCurrency(amount: number): string {
     currency: "AUD",
   }).format(amount);
 }
+
+// Generate SEO-friendly slug from product name
+export function generateSlug(name: string): string {
+  if (!name || !name.trim()) {
+    return "";
+  }
+
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single
+    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+}
