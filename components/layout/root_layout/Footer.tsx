@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="bg-muted text-muted-foreground border-t border-border">
       <div className="wrapper py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
           <div>
             <h3 className="h3-bold text-foreground mb-3">{APP_NAME}</h3>
             <p className="text-sm">
@@ -30,34 +30,18 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/about"
+                  className="hover:text-foreground transition-colors"
+                >
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/contact"
                   className="hover:text-foreground transition-colors"
                 >
                   Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">
-              Support
-            </h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/about"
-                  className="hover:text-foreground transition-colors"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/faq"
-                  className="hover:text-foreground transition-colors"
-                >
-                  FAQ
                 </Link>
               </li>
             </ul>

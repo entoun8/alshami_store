@@ -69,7 +69,7 @@ export default function CartView({ cart }: CartViewProps) {
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
             {cart.items.map((item) => (
-              <CartItem key={item.product_id} item={item} />
+              <CartItem key={item.product_id} item={item} variant="mobile" />
             ))}
           </div>
         </div>

@@ -16,9 +16,9 @@ export default function SignOutButton({
   showIcon = true
 }: SignOutButtonProps) {
   return (
-    <form action={signOutAction}>
+    <form action={signOutAction} className="w-full">
       <Button type="submit" size={size} variant={variant} className={className}>
-        {showIcon && <LogOut className="h-4 w-4" />}
+        {showIcon && <LogOut className="mr-2 h-4 w-4" />}
         <span>Sign Out</span>
       </Button>
     </form>

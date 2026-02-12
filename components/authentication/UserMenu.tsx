@@ -71,25 +71,24 @@ export default function UserMenu({ user }: UserMenuProps) {
           </Link>
         </DropdownMenuItem>
         {user.role === "admin" && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/admin/products" className="flex items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                Admin
-              </Link>
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem asChild>
+            <Link href="/admin/products" className="flex items-center">
+              <Settings className="mr-2 h-4 w-4" />
+              Admin
+            </Link>
+          </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={(e) => {
             e.preventDefault();
           }}
+          className="p-0"
         >
           <SignOutButton
             variant="ghost"
             size="sm"
-            className="w-full justify-start p-0 h-auto font-normal hover:bg-transparent"
+            className="w-full h-full flex items-center justify-start px-2 py-1.5 font-normal hover:bg-transparent"
             showIcon={true}
           />
         </DropdownMenuItem>

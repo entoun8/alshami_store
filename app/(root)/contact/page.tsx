@@ -24,7 +24,7 @@ export default function ContactPage() {
       icon: Share2,
       title: "Instagram",
       description: "Follow us on Instagram",
-      value: "@bashar_shalhoub_007",
+      value: "@alshami_coffee",
       href: "https://www.instagram.com/bashar_shalhoub_007?igsh=MXhlb2psMWh2Z2l1Ng%3D%3D&utm_source=qr",
       bgColor: "bg-accent",
     },

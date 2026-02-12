@@ -90,11 +90,9 @@ export default async function Header() {
                     Quick Actions
                   </h3>
 
-                  <div className="flex items-center h-10 px-3 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <div className="flex items-center h-10 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
                     <SearchTrigger products={products} />
-                    <span className="text-sm font-medium ml-1">
-                      Search Products
-                    </span>
+                    <span className="text-sm font-medium">Search Products</span>
                   </div>
 
                   <Link
