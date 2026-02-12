@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   Card,
   CardContent,
@@ -7,6 +8,11 @@ import {
 } from "@/components/ui/card";
 import SignInButton from "@/components/authentication/SignInButton";
 import { APP_NAME } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description: "Sign in to your Alshami Store account to access your profile and order history.",
+};
 
 export default function LoginPage() {
   return (

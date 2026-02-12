@@ -1,10 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserById } from "@/lib/data-service";
 import UserProfileForm from "@/components/user/UserProfileForm";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "My Profile",
+  description: "Manage your account profile and personal information.",
 };
 
 export default async function ProfilePage() {

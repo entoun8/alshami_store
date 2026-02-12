@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import { getMyCart, getUserById } from "@/lib/data-service";
 import { auth } from "@/lib/auth";
-import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ShippingAddress, CartItem } from "@/types";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
@@ -12,6 +12,7 @@ import PlaceOrderButton from "@/components/checkout/PlaceOrderButton";
 
 export const metadata: Metadata = {
   title: "Place Order",
+  description: "Review your order details and complete your purchase.",
 };
 
 export default async function PlaceOrderPage() {

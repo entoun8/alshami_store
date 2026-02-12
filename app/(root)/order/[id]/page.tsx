@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Stripe from "stripe";
 import { getOrderById } from "@/lib/data-service";
 import { notFound } from "next/navigation";
@@ -28,6 +28,7 @@ import StripePayment from "@/components/checkout/StripePayment";
 
 export const metadata: Metadata = {
   title: "Order Details",
+  description: "View your order details, shipping information, and payment status.",
 };
 
 type Props = {

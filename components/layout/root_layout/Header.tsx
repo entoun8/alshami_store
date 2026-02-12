@@ -35,9 +35,11 @@ export default async function Header() {
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2">
             <SearchTrigger products={products} />
-            <Link href="/cart">
-              <CartIcon />
-            </Link>
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/cart">
+                <CartIcon />
+              </Link>
+            </Button>
             <ThemeToggle />
             {session?.user ? (
               <UserMenu user={session.user} />

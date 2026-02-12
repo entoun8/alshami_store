@@ -1,10 +1,13 @@
+import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Share2, MessageCircle } from "lucide-react";
 import Link from "next/link";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Contact Us",
+  description:
+    "Get in touch with Alshami Store. Contact us via email, Instagram, or Facebook for inquiries about our premium herbs and coffee products.",
 };
 
 export default function ContactPage() {

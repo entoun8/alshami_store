@@ -1,10 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserOrders } from "@/lib/data-service";
 import OrderHistoryList from "@/components/user/OrderHistoryList";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Order History",
+  description: "View your past orders and track order status.",
 };
 
 export default async function OrdersPage() {

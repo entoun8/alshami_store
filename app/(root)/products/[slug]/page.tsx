@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getProductBySlug, getMyCart } from "@/lib/data-service";
@@ -6,7 +7,43 @@ import AddToCart from "@/components/cart/AddToCart";
 
 type Params = Promise<{ slug: string }>;
 
-export default async function ProductDetails({ params }: { params: Params }) {
+type Props = {
+  params: Params;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+    };
+  }
+
+  const description = product.description.length > 160
+    ? product.description.substring(0, 157) + "..."
+    : product.description;
+
+  return {
+    title: product.name,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      images: [{ url: product.image }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      images: [product.image],
+    },
+  };
+}
+
+export default async function ProductDetails({ params }: Props) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 

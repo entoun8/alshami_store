@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getMyCart, getUserById } from "@/lib/data-service";
 import auth from "@/middleware";
 import { redirect } from "next/navigation";
@@ -5,8 +6,9 @@ import ShippingAddressForm from "@/components/checkout/ShippingAddressForm";
 import CheckoutSteps from "@/components/checkout/CheckoutSteps";
 import type { ShippingAddress } from "@/types";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Shipping Address",
+  description: "Enter your shipping address for order delivery.",
 };
 
 export default async function ShippingAddress() {
